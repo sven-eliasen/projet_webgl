@@ -140,6 +140,7 @@
 				controls.addEventListener('unlock', function () {
 					let menu = document.getElementById("menu");
 					menu.style.display = "block";
+					console.log(camera.position);
 				});
 				// on click, lock the pointer on mouse
 				document.addEventListener('keydown', Keyboard, false);
@@ -264,6 +265,8 @@
 				requestAnimationFrame( animate );
 				stats.update();
 
+				checkCollisions();
+
 			}
 
 			function render() {
@@ -278,6 +281,27 @@
 
 				renderer.render( scene, camera );
 
+			}
+
+			function checkCollisions() {
+
+				if (camera.position.x > 1160) {
+					let walk = camera.position.x - 1160;
+					camera.position.x -= walk;
+				}
+				if (camera.position.x < -1160) {
+					let walk = 1160 + camera.position.x;
+					camera.position.x -= walk;
+				}
+
+				if (camera.position.z > 1160) {
+					let walk = camera.position.z - 1160;
+					camera.position.z -= walk;
+				}
+				if (camera.position.z < -1160) {
+					let walk = 1160 + camera.position.z;
+					camera.position.z -= walk;
+				}
 			}
 
 			function loadHouse() {
