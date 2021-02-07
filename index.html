@@ -54,14 +54,8 @@
 			// basic objects
 			let camera, scene, renderer, controls, gui, stats, clock, manager;
 
-			// animations
-			let loader;
-			//let mixers = new Array();
-
-
 			// world objects
-			let directionalLight, ambient;
-
+			let directionalLight, ambient, loader, skybox_loader, skybox_texture;
 
 			// loader manager
 			manager = get_manager();
@@ -83,6 +77,9 @@
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.body.appendChild( renderer.domElement );
+
+				// skybox
+				loadSkybox();
 
 				// stats
 				stats = new Stats();
@@ -172,6 +169,22 @@
 				stats.dom.style.display = "none";
 				let menu = document.getElementById("menu");
 				menu.style.display = "none";
+
+			}
+
+			function loadSkybox() {
+
+				skybox_loader = new THREE.CubeTextureLoader(manager);
+  			skybox_texture = skybox_loader.load([
+    			'textures/xpos.png',
+    			'textures/xneg.png',
+    			'textures/ypos.png',
+    			'textures/yneg.png',
+    			'textures/zpos.png',
+    			'textures/zneg.png',
+  			]);
+
+  			scene.background = skybox_texture;
 
 			}
 
