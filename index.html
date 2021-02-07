@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - geometry - cube</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="css/main.css">
+		<style media="screen">
+			#menu{
+				position: absolute;
+				width: 100%;
+				text-align: center;
+				background-color: rgba(0, 0, 0, 0.5);
+			}
+			#main{
+				text-align: center;
+			}
+			#loader{
+				padding-top: 20%;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Msg bar when user not in focus of the scene -->
+		<div id="menu" hidden>
+			<h1>Click to move !</h1>
+		</div>
+
+		<!-- Loader manager
+		<main id="main">
+			<div id="loader">
+				<h1>Loading...</h1>
+				<progress value="0" max="8" id="bar">0%</progress><br>
+				<textarea name="name" rows="8" cols="80" id="textarea"></textarea>
+			</div>
+		</main> -->
+
+		<script type="module">
+
+			//imports
+			import * as THREE from './js/three.module.js';
+			import { GUI } from './js/dat.gui.module.js';
+			import { PointerLockControls } from './js/PointerLockControls.js';
+			import Stats from './js/stats.module.js';
+			import { GLTFLoader } from './js/GLTFLoader.js';
+
+
+			// helper objects
+			let shadowCameraHelper, directionalLightHelper;
+
+			// need some counters...
+			let count = 200;
+			let count2 = 0;
+
+			// basic objects
+			let camera, scene, renderer, controls, gui, stats, clock, manager;
+
+			// animations
+			let loader;
+			//let mixers = new Array();
+
+
+			// world objects
+			let directionalLight, ambient;
+
+
+			// loader manager
+			//manager = get_manager();
+
+			// basic functions call
+			init();
+			buildGui();
+			animate();
+
+
+			// setup init
+			function init() {
+
+				// create scene
+				scene = new THREE.Scene();
+
+				// setup renderer
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				// stats
+				stats = new Stats();
+				document.body.appendChild( stats.dom );
+
+				// clock
+				clock = new THREE.Clock();
+
+				// enable shadows in renderer
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+				renderer.outputEncoding = THREE.sRGBEncoding;
+
+				//create ambient (basic light)
+				ambient = new THREE.AmbientLight(0xffffff, 0.1);
+				scene.add( ambient );
+
+
+				// setup light
+				directionalLight = new THREE.DirectionalLight( 0xffffff, 0.4 );
+				directionalLight.position.set( -500, 1000, 100 );
+				directionalLight.castShadow = true;
+				directionalLight.shadow.camera.near = 1;
+				directionalLight.shadow.camera.far = 5000;
+				let shadowCameraSize = 1700;
+				directionalLight.shadow.camera.left = -shadowCameraSize;
+				directionalLight.shadow.camera.right = shadowCameraSize;
+				directionalLight.shadow.camera.top = shadowCameraSize;
+				directionalLight.shadow.camera.bottom = -shadowCameraSize;
+				scene.add( directionalLight );
+
+
+				// setup helpers
+				directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight, 5 );
+        scene.add( directionalLightHelper );// DEBUG: not for prod
+				shadowCameraHelper = new THREE.CameraHelper( directionalLight.shadow.camera );
+				scene.add(shadowCameraHelper);// DEBUG: not for prod
+
+
+				// setup camera
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 3000 );
+				camera.position.z = 0;
+				camera.position.y = 150;
+				camera.position.x = -500;
+
+
+				// setup firstPersonControl
+				controls = new PointerLockControls(camera, renderer.domElement);
+
+				document.addEventListener('pointerlockerror', function functionName() {
+					console.log("DEBUG");
+				}, false);
+
+				controls.addEventListener('lock', function () {
+					let menu = document.getElementById("menu");
+					menu.style.display = "none";
+				});
+				controls.addEventListener('unlock', function () {
+					let menu = document.getElementById("menu");
+					menu.style.display = "block";
+				});
+				// on click, lock the pointer on mouse
+				document.addEventListener('keydown', Keyboard, false);
+
+
+				loader = new GLTFLoader().setPath( 'models/' );
+				loadHouse();
+				loadFences();
+
+
+				// call resize on window changes
+				window.addEventListener( 'resize', onWindowResize, false );
+
+
+				// things to call on user click
+				renderer.domElement.addEventListener( 'click', function () {
+					controls.lock();
+
+					if (count2 == 0) {
+						count2++;
+						//step_sound.play();
+					}
+				}, false );
+
+			}
+
+			// resize camera when the window change resolution
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+
+			function get_manager() {
+				let progressBar = document.getElementById("bar");
+				let textarea = document.getElementById("textarea");
+				let manager = new THREE.LoadingManager();
+
+				manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+
+					progressBar.setAttribute("value", itemsLoaded);
+					progressBar.setAttribute("max", itemsTotal);
+					textarea.innerHTML = textarea.innerHTML + "\r\n" + url;
+
+				};
+				manager.onLoad = function ( ) {
+
+					let main = document.getElementById("main");
+					main.style.display = "none";
+					renderer.domElement.style.display = "block";
+					stats.dom.style.display = "block";
+					let menu = document.getElementById("menu");
+					menu.style.display = "block";
+					gui.domElement.style.display = "block";
+
+				};
+				manager.onError = function ( url ) {
+
+					console.log( 'There was an error loading ' + url );
+
+				};
+
+				return manager;
+
+			}
+
+
+			// move with zqsd
+			function Keyboard() {
+				let speed = 10;
+				if (event.keyCode == 90){
+					controls.moveForward(speed);
+				}
+				if (event.keyCode == 83) {
+					controls.moveForward(-speed);
+				}
+				if (event.keyCode == 68) {
+					controls.moveRight(speed);
+				}
+				if (event.keyCode == 81) {
+					controls.moveRight(-speed);
+				}
+
+				// going up and down with SPACE and A
+				/*if (event.keyCode == 65) {
+					camera.position.y = camera.position.y - speed;
+				}
+				if (event.keyCode == 32) {
+					camera.position.y = camera.position.y + speed;
+				}*/
+			}
+
+			// animation loop
+			function animate() {
+
+				render();
+				requestAnimationFrame( animate );
+				stats.update();
+
+			}
+
+			function render() {
+
+				const delta = clock.getDelta();
+
+				/*if(mixers.length > 1){
+					for(let i = 0; i < mixers.length; i++){
+						mixers[i].update(delta);
+					}
+				}*/
+
+				//shadowCameraHelper.update();
+				//directionalLightHelper.update();
+
+				renderer.render( scene, camera );
+
+			}
+
+			function loadHouse() {
+				loader.load( 'scene.glb', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									child.castShadow = true;
+									child.receiveShadow = true;
+								}
+
+							} );
+							gltf.scene.scale.set(100, 100, 100);
+							scene.add( gltf.scene );
+
+				} );
+			}
+
+			function loadFences() {
+				loader.load( 'fence.glb', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									child.castShadow = true;
+									child.receiveShadow = true;
+								}
+
+							} );
+							gltf.scene.position.set( -350, 0, 1200 );
+							gltf.scene.rotateY(Math.PI);
+							gltf.scene.scale.set(100, 100, 100);
+							scene.add( gltf.scene );
+
+				} );
+
+				loader.load( 'fence.glb', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									child.castShadow = true;
+									child.receiveShadow = true;
+								}
+
+							} );
+							gltf.scene.position.set( 350, 0, -1200 );
+							gltf.scene.scale.set(100, 100, 100);
+							scene.add( gltf.scene );
+
+				} );
+
+				loader.load( 'fence.glb', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									child.castShadow = true;
+									child.receiveShadow = true;
+								}
+
+							} );
+							gltf.scene.position.set( -1200, 0, -350);
+							gltf.scene.rotateY(Math.PI * 0.5);
+							gltf.scene.scale.set(100, 100, 100);
+							scene.add( gltf.scene );
+
+				} );
+
+				loader.load( 'fence.glb', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									child.castShadow = true;
+									child.receiveShadow = true;
+								}
+
+							} );
+							gltf.scene.position.set( 1200, 0, 350);
+							gltf.scene.rotateY(Math.PI);
+							gltf.scene.rotateY(Math.PI * 0.5);
+							gltf.scene.scale.set(100, 100, 100);
+							scene.add( gltf.scene );
+
+				} );
+			}
+
+			function buildGui() {
+
+				gui = new GUI();
+
+				var params = {
+					//circle: circle.position.x,
+					light_position_x: directionalLight.position.x,
+					light_position_y: directionalLight.position.y,
+					light_position_z: directionalLight.position.z,
+				};
+
+				gui.add( params, 'light_position_x', -500, 500 ).onChange( function ( val ) {
+
+					directionalLight.position.x = val;
+					render();
+
+				} );
+
+				gui.add( params, 'light_position_y', 0, 1000 ).onChange( function ( val ) {
+
+					directionalLight.position.y = val;
+					render();
+
+				} );
+
+				gui.add( params, 'light_position_z', -500, 500 ).onChange( function ( val ) {
+
+					directionalLight.position.z = val;
+					render();
+
+				} );
+
+
+				gui.open();
+
+			}
+
+		</script>
+
+	</body>
+</html>
