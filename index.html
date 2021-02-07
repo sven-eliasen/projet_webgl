@@ -26,14 +26,13 @@
 			<h1>Click to move !</h1>
 		</div>
 
-		<!-- Loader manager
 		<main id="main">
 			<div id="loader">
 				<h1>Loading...</h1>
 				<progress value="0" max="8" id="bar">0%</progress><br>
 				<textarea name="name" rows="8" cols="80" id="textarea"></textarea>
 			</div>
-		</main> -->
+		</main>
 
 		<script type="module">
 
@@ -65,7 +64,7 @@
 
 
 			// loader manager
-			//manager = get_manager();
+			manager = get_manager();
 
 			// basic functions call
 			init();
@@ -149,7 +148,7 @@
 				document.addEventListener('keydown', Keyboard, false);
 
 
-				loader = new GLTFLoader().setPath( 'models/' );
+				loader = new GLTFLoader(manager).setPath( 'models/' );
 				loadHouse();
 				loadFences();
 
@@ -167,6 +166,12 @@
 						//step_sound.play();
 					}
 				}, false );
+
+
+				renderer.domElement.style.display = "none";
+				stats.dom.style.display = "none";
+				let menu = document.getElementById("menu");
+				menu.style.display = "none";
 
 			}
 
@@ -391,6 +396,8 @@
 
 
 				gui.open();
+
+				gui.domElement.style.display = "none";
 
 			}
 
