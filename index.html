@@ -285,6 +285,7 @@
 
 			function checkCollisions() {
 
+				// collisions on fences
 				if (camera.position.x > 1160) {
 					let walk = camera.position.x - 1160;
 					camera.position.x -= walk;
@@ -293,7 +294,6 @@
 					let walk = 1160 + camera.position.x;
 					camera.position.x -= walk;
 				}
-
 				if (camera.position.z > 1160) {
 					let walk = camera.position.z - 1160;
 					camera.position.z -= walk;
@@ -302,6 +302,29 @@
 					let walk = 1160 + camera.position.z;
 					camera.position.z -= walk;
 				}
+
+				// collisions on house
+				if (camera.position.z < 300 && camera.position.z > -340) {
+					if (camera.position.x < 0 && camera.position.x > -410) {
+						let walk = 410 + camera.position.x;
+						camera.position.x -= walk;
+					}
+					if (camera.position.x > 0 && camera.position.x < 420) {
+						let walk = camera.position.x - 420;
+						camera.position.x -= walk;
+					}
+				}
+				if (camera.position.x < 420 && camera.position.x > -390) {
+					if (camera.position.z < 0 && camera.position.z > -360) {
+						let walk = 360 + camera.position.z;
+						camera.position.z -= walk;
+					}
+					if (camera.position.z > 0 && camera.position.z < 320) {
+						let walk = camera.position.z - 320;
+						camera.position.z -= walk;
+					}
+				}
+
 			}
 
 			function loadHouse() {
