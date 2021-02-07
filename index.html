@@ -116,10 +116,10 @@
 
 
 				// setup helpers
-				directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight, 5 );
+				/*directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight, 5 );
         scene.add( directionalLightHelper );// DEBUG: not for prod
 				shadowCameraHelper = new THREE.CameraHelper( directionalLight.shadow.camera );
-				scene.add(shadowCameraHelper);// DEBUG: not for prod
+				scene.add(shadowCameraHelper);// DEBUG: not for prod*/
 
 
 				// setup camera
@@ -262,9 +262,6 @@
 						mixers[i].update(delta);
 					}
 				}*/
-
-				//shadowCameraHelper.update();
-				//directionalLightHelper.update();
 
 				renderer.render( scene, camera );
 
