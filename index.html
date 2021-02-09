@@ -46,6 +46,7 @@
 			import { PositionalAudio } from './js/audio/PositionalAudio.js';
 			import { Audio } from './js/audio/Audio.js';
 			import { AudioLoader } from './js/audio/AudioLoader.js';
+			import { ColladaLoader } from './js/ColladaLoader.js';
 
 			// helper objects
 			let shadowCameraHelper, directionalLightHelper;
@@ -59,6 +60,10 @@
 
 			// world objects
 			let directionalLight, ambient, loader, skybox_loader, skybox_texture;
+
+			// animations
+			let avatar, avatar_2, avatar_3, animations, mixer, action, pivot;
+			let mixers = new Array();
 
 			// sound variables
 			let listener, sound_ambiance, sound_ambiance_Loader, sound_object, sound_object_Loader;
@@ -281,11 +286,11 @@
 
 				const delta = clock.getDelta();
 
-				/*if(mixers.length > 1){
+				if(mixers.length > 1){
 					for(let i = 0; i < mixers.length; i++){
 						mixers[i].update(delta);
 					}
-				}*/
+				}
 
 				renderer.render( scene, camera );
 
@@ -426,6 +431,40 @@
 
 				} );
 			}
+
+			CharacterAnimation(avatar,'./models/Northern Soul Spin Combo/Northern Soul Spin Combo.dae',-750, 10, -400);
+			CharacterAnimation(avatar_2,'./models/Kneeling Pointing/Kneeling Pointing.dae',-500, 10, -400);
+
+			function CharacterAnimation(object, animation_src, x, y, z){
+				loader = new ColladaLoader(manager);
+				loader.load( animation_src, function ( collada ) {
+					object = collada.scene;
+					animations = collada.animations;
+
+					object.traverse( function ( node ) {
+
+						if ( node.isSkinnedMesh ) {
+
+							node.frustumCulled = false;
+							node.castShadow = true;
+							node.receiveShadow = true;
+
+						}
+
+					} );
+
+					var mixer = new THREE.AnimationMixer( object );
+					mixer.clipAction( animations[0] ).play();
+					console.log(mixer.clipAction( animations[0] ).play());
+					object.scale.set(1, 1, 1);
+					object.position.set(x, y, z);
+					scene.add( object );
+					mixers.push( mixer );
+
+				} );
+			}
+
+
 
 			//ambiance sound function
 			function ambiance(){
