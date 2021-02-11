@@ -68,7 +68,7 @@
 			// sound variables
 			let listener, sound_ambiance, sound_ambiance_Loader, sound_object, sound_object_Loader;
 			let location_sound_ambiance = "./sound/tomb-raider-underworld-mediterranean-seaniflheim-soundtrack-ost-hd.mp3";
-			let location_sound_object = "./sound/";
+			let location_sound_object = "./sound/FunnyRetroTwistDance.mp3";
 
 			// loader manager
 			manager = get_manager();
@@ -152,7 +152,6 @@
 				controls.addEventListener('unlock', function () {
 					let menu = document.getElementById("menu");
 					menu.style.display = "block";
-					console.log(camera.position);
 				});
 				// on click, lock the pointer on mouse
 				document.addEventListener('keydown', Keyboard, false);
@@ -161,6 +160,7 @@
 				loader = new GLTFLoader(manager).setPath( 'models/' );
 				loadHouse();
 				loadFences();
+				CharacterAnimation(avatar, -600, 110, -400);
 
 
 				// call resize on window changes
@@ -434,16 +434,8 @@
 				} );
 			}
 
-
-			var which_animation = true;
-			var state = 0;
-
-			//CharacterAnimation(avatar,'./models/Northern Soul Spin Combo/Northern Soul Spin Combo.dae',-750, 10, -400);
-			//CharacterAnimation(avatar_2,'./models/Kneeling Pointing/Kneeling Pointing.dae',-500, 10, -400);
-
-			function CharacterAnimation(object, animation_src, x, y, z){
-				loader = new ColladaLoader(manager);
-				loader.load( animation_src, function ( collada ) {
+			function CharacterAnimation(object, x, y, z){
+				loader.load( "papy-twist.glb", function ( collada ) {
 					object = collada.scene;
 					animations = collada.animations;
 
@@ -463,12 +455,12 @@
 					mixer.clipAction( animations[0] ).play();
 					object.scale.set(1, 1, 1);
 					object.position.set(x, y, z);
+					soundObject(object);
 					scene.add(object);
 					mixers.push( mixer );
 
 				} );
 			}
-
 
 
 			//ambiance sound function
@@ -481,7 +473,7 @@
 				sound_ambiance_Loader.load(location_sound_ambiance, function(buffer){
 					sound_ambiance.setBuffer(buffer);
 					sound_ambiance.setLoop(true);
-					sound_ambiance.setVolume(0.1);
+					sound_ambiance.setVolume(0.01);
 					sound_ambiance.play();
 
 				});
@@ -496,9 +488,9 @@
 				sound_object_Loader.load(location_sound_object, function(buffer){
 					sound_object.setBuffer(buffer);
 					sound_object.setLoop(true);
-					sound_object.setRefDistance(10);
-					sound_object.setVolume(5.0);
-					//sound_ambiance.play();
+					sound_object.setRefDistance(5);
+					sound_object.setVolume(0.1);
+					sound_object.play();
 
 				});
 				avatar_object.add(sound_object);
@@ -519,8 +511,7 @@
 					light_position_x: directionalLight.position.x,
 					light_position_y: directionalLight.position.y,
 					light_position_z: directionalLight.position.z,
-					volume: 0.10,
-					change_animation: false
+					volume: 0.01,
 
 				};
 
@@ -551,28 +542,6 @@
 					render();
 
 				} );
-
-				gui.add(params, 'change_animation').onChange(function (value) {
-					if(which_animation == true){
-						CharacterAnimation(avatar,'./models/Walk In Circle/Walk In Circle.dae',-750, 10, -400);
-						if ( state == 2 ){
-							console.log("test_animation_2 existe !!");
-							scene.children.pop();
-						}
-						which_animation = false;
-						state = 1;
-					}
-				  else{
-						if ( state == 1 ){
-							CharacterAnimation(avatar,'./models/Northern Soul Spin Combo/Northern Soul Spin Combo.dae',-750, 10, -400);
-							scene.children.pop();
-						}
-						which_animation = true;
-						state = 2;
-					}
-					render();
-				});
-
 
 				gui.open();
 
