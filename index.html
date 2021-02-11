@@ -455,7 +455,21 @@
 					mixer.clipAction( animations[0] ).play();
 					object.scale.set(1, 1, 1);
 					object.position.set(x, y, z);
+
 					soundObject(object);
+					let count = 0;
+					mixer.addEventListener( 'loop', function() {
+						if (count == 0) {
+							mixer.clipAction( animations[0] ).stop();
+							mixer.clipAction( animations[1] ).play();
+							count = 1;
+						} else {
+							mixer.clipAction( animations[1] ).stop();
+							mixer.clipAction( animations[0] ).play();
+							count = 0;
+						}
+					} );
+
 					scene.add(object);
 					mixers.push( mixer );
 
