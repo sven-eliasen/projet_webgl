@@ -68,7 +68,7 @@
 			// sound variables
 			let listener, sound_ambiance, sound_ambiance_Loader, sound_object, sound_object_Loader;
 			let location_sound_ambiance = "./sound/tomb-raider-underworld-mediterranean-seaniflheim-soundtrack-ost-hd.mp3";
-			let location_sound_object = "./sound/";
+			let location_sound_object = "./sound/336598__inspectorj__footsteps-concrete-a.wav";
 
 			// loader manager
 			manager = get_manager();
@@ -464,6 +464,8 @@
 					object.scale.set(1, 1, 1);
 					object.position.set(x, y, z);
 					scene.add(object);
+					soundObject(object);
+					console.log(object);
 					mixers.push( mixer );
 
 				} );
@@ -481,7 +483,7 @@
 				sound_ambiance_Loader.load(location_sound_ambiance, function(buffer){
 					sound_ambiance.setBuffer(buffer);
 					sound_ambiance.setLoop(true);
-					sound_ambiance.setVolume(0.1);
+					sound_ambiance.setVolume(1.0);
 					sound_ambiance.play();
 
 				});
@@ -497,8 +499,8 @@
 					sound_object.setBuffer(buffer);
 					sound_object.setLoop(true);
 					sound_object.setRefDistance(10);
-					sound_object.setVolume(5.0);
-					//sound_ambiance.play();
+					sound_object.setVolume(100);
+					sound_object.play();
 
 				});
 				avatar_object.add(sound_object);
@@ -519,7 +521,7 @@
 					light_position_x: directionalLight.position.x,
 					light_position_y: directionalLight.position.y,
 					light_position_z: directionalLight.position.z,
-					volume: 0.10,
+					volume: 0,
 					change_animation: false
 
 				};
@@ -545,7 +547,7 @@
 
 				} );
 
-				gui.add( params, 'volume', 0.01, 0.10 ).onChange( function ( val ) {
+				gui.add( params, 'volume', 0, 5.0 ).onChange( function ( val ) {
 
 					sound_ambiance.setVolume(val);
 					render();
@@ -556,7 +558,6 @@
 					if(which_animation == true){
 						CharacterAnimation(avatar,'./models/Walk In Circle/Walk In Circle.dae',-750, 10, -400);
 						if ( state == 2 ){
-							console.log("test_animation_2 existe !!");
 							scene.children.pop();
 						}
 						which_animation = false;
