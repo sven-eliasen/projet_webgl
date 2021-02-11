@@ -46,7 +46,6 @@
 			import { PositionalAudio } from './js/audio/PositionalAudio.js';
 			import { Audio } from './js/audio/Audio.js';
 			import { AudioLoader } from './js/audio/AudioLoader.js';
-			import { ColladaLoader } from './js/ColladaLoader.js';
 
 			// helper objects
 			let shadowCameraHelper, directionalLightHelper;
@@ -62,13 +61,13 @@
 			let directionalLight, ambient, loader, skybox_loader, skybox_texture;
 
 			// animations
-			let avatar, avatar_2, avatar_3, animations, mixer, action, pivot;
+			let avatar, animations, mixer;
 			let mixers = new Array();
 
 			// sound variables
 			let listener, sound_ambiance, sound_ambiance_Loader, sound_object, sound_object_Loader;
 			let location_sound_ambiance = "./sound/tomb-raider-underworld-mediterranean-seaniflheim-soundtrack-ost-hd.mp3";
-			let location_sound_object = "./sound/";
+			let location_sound_object = "./sound/FunnyRetroTwistDance.mp3";
 
 			// loader manager
 			manager = get_manager();
@@ -152,15 +151,16 @@
 				controls.addEventListener('unlock', function () {
 					let menu = document.getElementById("menu");
 					menu.style.display = "block";
-					console.log(camera.position);
 				});
 				// on click, lock the pointer on mouse
 				document.addEventListener('keydown', Keyboard, false);
 
 
+				// load every models
 				loader = new GLTFLoader(manager).setPath( 'models/' );
 				loadHouse();
 				loadFences();
+				CharacterAnimation(avatar, -600, 110, -400);
 
 
 				// call resize on window changes
@@ -170,11 +170,6 @@
 				// things to call on user click
 				renderer.domElement.addEventListener( 'click', function () {
 					controls.lock();
-
-					if (count2 == 0) {
-						count2++;
-						//sound_ambiance.play();
-					}
 				}, false );
 
 
@@ -285,11 +280,13 @@
 			function render() {
 
 				const delta = clock.getDelta();
-
 				if(mixers.length > 1){
 					for(let i = 0; i < mixers.length; i++){
 						mixers[i].update(delta);
 					}
+				}
+				else if (mixers.length == 1) {
+					mixers[0].update(delta);
 				}
 
 				renderer.render( scene, camera );
@@ -432,12 +429,8 @@
 				} );
 			}
 
-			CharacterAnimation(avatar,'./models/Northern Soul Spin Combo/Northern Soul Spin Combo.dae',-750, 10, -400);
-			CharacterAnimation(avatar_2,'./models/Kneeling Pointing/Kneeling Pointing.dae',-500, 10, -400);
-
-			function CharacterAnimation(object, animation_src, x, y, z){
-				loader = new ColladaLoader(manager);
-				loader.load( animation_src, function ( collada ) {
+			function CharacterAnimation(object, x, y, z){
+				loader.load( "papy-twist.glb", function ( collada ) {
 					object = collada.scene;
 					animations = collada.animations;
 
@@ -453,18 +446,30 @@
 
 					} );
 
-					var mixer = new THREE.AnimationMixer( object );
+					var mixer = new THREE.AnimationMixer(object);
 					mixer.clipAction( animations[0] ).play();
-					console.log(mixer.clipAction( animations[0] ).play());
 					object.scale.set(1, 1, 1);
 					object.position.set(x, y, z);
-					scene.add( object );
+
+					soundObject(object);
+					let count = 0;
+					mixer.addEventListener( 'loop', function() {
+						if (count == 0) {
+							mixer.clipAction( animations[0] ).stop();
+							mixer.clipAction( animations[1] ).play();
+							count = 1;
+						} else {
+							mixer.clipAction( animations[1] ).stop();
+							mixer.clipAction( animations[0] ).play();
+							count = 0;
+						}
+					} );
+
+					scene.add(object);
 					mixers.push( mixer );
 
 				} );
 			}
-
-
 
 			//ambiance sound function
 			function ambiance(){
@@ -476,7 +481,7 @@
 				sound_ambiance_Loader.load(location_sound_ambiance, function(buffer){
 					sound_ambiance.setBuffer(buffer);
 					sound_ambiance.setLoop(true);
-					sound_ambiance.setVolume(1.0);
+					sound_ambiance.setVolume(0.01);
 					sound_ambiance.play();
 
 				});
@@ -491,9 +496,9 @@
 				sound_object_Loader.load(location_sound_object, function(buffer){
 					sound_object.setBuffer(buffer);
 					sound_object.setLoop(true);
-					sound_object.setRefDistance(10);
-					sound_object.setVolume(5.0);
-					//sound_ambiance.play();
+					sound_object.setRefDistance(5);
+					sound_object.setVolume(0.1);
+					sound_object.play();
 
 				});
 				avatar_object.add(sound_object);
@@ -514,6 +519,8 @@
 					light_position_x: directionalLight.position.x,
 					light_position_y: directionalLight.position.y,
 					light_position_z: directionalLight.position.z,
+					volume: 0.01,
+
 				};
 
 				gui.add( params, 'light_position_x', -500, 500 ).onChange( function ( val ) {
@@ -530,13 +537,19 @@
 
 				} );
 
-				gui.add( params, 'light_position_z', -500, 500 ).onChange( function ( val ) {
+				gui.add( params, 'light_position_y', 0, 1000 ).onChange( function ( val ) {
 
-					directionalLight.position.z = val;
+					directionalLight.position.y = val;
 					render();
 
 				} );
 
+				gui.add( params, 'volume', 0.01, 0.10 ).onChange( function ( val ) {
+
+					sound_ambiance.setVolume(val);
+					render();
+
+				} );
 
 				gui.open();
 
