@@ -481,7 +481,7 @@
 				sound_ambiance_Loader.load(location_sound_ambiance, function(buffer){
 					sound_ambiance.setBuffer(buffer);
 					sound_ambiance.setLoop(true);
-					sound_ambiance.setVolume(1.0);
+					sound_ambiance.setVolume(0.1);
 					sound_ambiance.play();
 
 				});
@@ -519,7 +519,7 @@
 					light_position_x: directionalLight.position.x,
 					light_position_y: directionalLight.position.y,
 					light_position_z: directionalLight.position.z,
-					volume: 0,
+					volume: 0.10,
 					change_animation: false
 
 				};
@@ -545,7 +545,7 @@
 
 				} );
 
-				gui.add( params, 'volume', 0, 5.0 ).onChange( function ( val ) {
+				gui.add( params, 'volume', 0.01, 0.10 ).onChange( function ( val ) {
 
 					sound_ambiance.setVolume(val);
 					render();
