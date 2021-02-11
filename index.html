@@ -46,7 +46,6 @@
 			import { PositionalAudio } from './js/audio/PositionalAudio.js';
 			import { Audio } from './js/audio/Audio.js';
 			import { AudioLoader } from './js/audio/AudioLoader.js';
-			import { ColladaLoader } from './js/ColladaLoader.js';
 
 			// helper objects
 			let shadowCameraHelper, directionalLightHelper;
@@ -62,7 +61,7 @@
 			let directionalLight, ambient, loader, skybox_loader, skybox_texture;
 
 			// animations
-			let avatar, avatar_2, avatar_3, animations, mixer, action, pivot;
+			let avatar, animations, mixer;
 			let mixers = new Array();
 
 			// sound variables
@@ -157,6 +156,7 @@
 				document.addEventListener('keydown', Keyboard, false);
 
 
+				// load every models
 				loader = new GLTFLoader(manager).setPath( 'models/' );
 				loadHouse();
 				loadFences();
@@ -170,11 +170,6 @@
 				// things to call on user click
 				renderer.domElement.addEventListener( 'click', function () {
 					controls.lock();
-
-					if (count2 == 0) {
-						count2++;
-						//sound_ambiance.play();
-					}
 				}, false );
 
 
@@ -475,7 +470,6 @@
 
 				} );
 			}
-
 
 			//ambiance sound function
 			function ambiance(){
